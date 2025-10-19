@@ -36,6 +36,13 @@ export default function SettingsScreen() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
 
+  // แยกโหลดของแต่ละ modal เพื่อไม่ให้ติดค้าง
+  const [saving, setSaving] = useState({
+    name: false,
+    email: false,
+    password: false,
+  });
+
   // modal state
   const [modal, setModal] = useState(null); // 'name' | 'email' | 'password' | null
   const [form, setForm] = useState({
@@ -60,6 +67,7 @@ export default function SettingsScreen() {
   const closeModal = () => {
     setModal(null);
     resetForm();
+    setSaving({ name: false, email: false, password: false });
   };
 
   const loadMe = useCallback(async () => {
@@ -77,7 +85,9 @@ export default function SettingsScreen() {
     }
   }, []);
 
-  useEffect(() => { loadMe(); }, [loadMe]);
+  useEffect(() => {
+    loadMe();
+  }, [loadMe]);
 
   // ----- actions -----
   const onSaveUsername = async () => {
@@ -91,6 +101,7 @@ export default function SettingsScreen() {
       return;
     }
     try {
+      setSaving((s) => ({ ...s, name: true }));
       const token = await getToken();
       await changeMyUsername(token, { new_username: newname, password: form.password });
       setUsername(newname);
@@ -98,6 +109,8 @@ export default function SettingsScreen() {
       Alert.alert("สำเร็จ", "เปลี่ยนชื่อผู้ใช้เรียบร้อย");
     } catch (e) {
       Alert.alert("เปลี่ยนชื่อไม่สำเร็จ", e.message || "เกิดข้อผิดพลาด");
+    } finally {
+      setSaving((s) => ({ ...s, name: false }));
     }
   };
 
@@ -111,7 +124,14 @@ export default function SettingsScreen() {
       Alert.alert("ยังไม่เปลี่ยน", "อีเมลใหม่เหมือนเดิม");
       return;
     }
+    // เช็คฟอร์แมตคร่าว ๆ ฝั่งหน้า
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newmail);
+    if (!emailOk) {
+      Alert.alert("อีเมลไม่ถูกต้อง", "รูปแบบอีเมลไม่ถูกต้อง");
+      return;
+    }
     try {
+      setSaving((s) => ({ ...s, email: true }));
       const token = await getToken();
       await changeMyEmail(token, { new_email: newmail, password: form.password });
       setEmail(newmail);
@@ -119,6 +139,8 @@ export default function SettingsScreen() {
       Alert.alert("สำเร็จ", "เปลี่ยนอีเมลเรียบร้อย");
     } catch (e) {
       Alert.alert("เปลี่ยนอีเมลไม่สำเร็จ", e.message || "เกิดข้อผิดพลาด");
+    } finally {
+      setSaving((s) => ({ ...s, email: false }));
     }
   };
 
@@ -136,6 +158,7 @@ export default function SettingsScreen() {
       return;
     }
     try {
+      setSaving((s) => ({ ...s, password: true }));
       const token = await getToken();
       await changeMyPassword(token, {
         old_password: form.old_password,
@@ -145,11 +168,15 @@ export default function SettingsScreen() {
       Alert.alert("สำเร็จ", "เปลี่ยนรหัสผ่านเรียบร้อย");
     } catch (e) {
       Alert.alert("เปลี่ยนรหัสผ่านไม่สำเร็จ", e.message || "เกิดข้อผิดพลาด");
+    } finally {
+      setSaving((s) => ({ ...s, password: false }));
     }
   };
 
   const onLogout = async () => {
-    try { await AsyncStorage.removeItem("token"); } catch {}
+    try {
+      await AsyncStorage.removeItem("token");
+    } catch {}
     nav.reset({ index: 0, routes: [{ name: "Login" }] });
   };
 
@@ -181,12 +208,14 @@ export default function SettingsScreen() {
             style={styles.input}
             placeholderTextColor="#B8B8BF"
           />
-          <Pressable style={styles.editChip} onPress={() => {
-            setForm((s) => ({ ...s, new_username: username }));
-            setModal("name");
-          }}>
+          <Pressable
+            style={styles.editChip}
+            onPress={() => {
+              setForm((s) => ({ ...s, new_username: username, password: "" }));
+              setModal("name");
+            }}
+          >
             <Ionicons name="create-outline" size={14} color="#0B0B0C" />
-            
           </Pressable>
         </View>
 
@@ -200,12 +229,14 @@ export default function SettingsScreen() {
             style={styles.input}
             placeholderTextColor="#B8B8BF"
           />
-          <Pressable style={styles.editChip} onPress={() => {
-            setForm((s) => ({ ...s, new_email: email }));
-            setModal("email");
-          }}>
+          <Pressable
+            style={styles.editChip}
+            onPress={() => {
+              setForm((s) => ({ ...s, new_email: email, password: "" }));
+              setModal("email");
+            }}
+          >
             <Ionicons name="create-outline" size={14} color="#0B0B0C" />
-            {/* <Text style={styles.editChipText}>แก้ไข</Text> */}
           </Pressable>
         </View>
 
@@ -217,16 +248,14 @@ export default function SettingsScreen() {
         </Pressable>
 
         {/* logout bottom */}
-      <View style={{ flex: 1 }} />
-      <View style={{ paddingBottom: Math.max(16, insets.bottom ) }}>
-        <Pressable style={styles.logoutBtn} onPress={onLogout}>
-          <Text style={styles.logoutText}>ออกจากระบบ</Text>
-          <Ionicons name="log-out-outline" size={18} color="#fff" />
-        </Pressable>
+        <View style={{ flex: 1 }} />
+        <View style={{ paddingBottom: Math.max(16, insets.bottom) }}>
+          <Pressable style={styles.logoutBtn} onPress={onLogout}>
+            <Text style={styles.logoutText}>ออกจากระบบ</Text>
+            <Ionicons name="log-out-outline" size={18} color="#fff" />
+          </Pressable>
+        </View>
       </View>
-      </View>
-
-      
 
       {/* ======= Modals ======= */}
       <EditModal visible={modal === "name"} title="เปลี่ยนชื่อผู้ใช้" onClose={closeModal}>
@@ -244,7 +273,7 @@ export default function SettingsScreen() {
           placeholder="••••••••"
           secureTextEntry
         />
-        <PrimarySave onPress={onSaveUsername} />
+        <PrimarySave onPress={onSaveUsername} loading={saving.name} />
       </EditModal>
 
       <EditModal visible={modal === "email"} title="เปลี่ยนอีเมล" onClose={closeModal}>
@@ -263,7 +292,7 @@ export default function SettingsScreen() {
           placeholder="••••••••"
           secureTextEntry
         />
-        <PrimarySave onPress={onSaveEmail} />
+        <PrimarySave onPress={onSaveEmail} loading={saving.email} />
       </EditModal>
 
       <EditModal visible={modal === "password"} title="เปลี่ยนรหัสผ่าน" onClose={closeModal}>
@@ -288,7 +317,7 @@ export default function SettingsScreen() {
           placeholder="••••••••"
           secureTextEntry
         />
-        <PrimarySave onPress={onSavePassword} />
+        <PrimarySave onPress={onSavePassword} loading={saving.password} />
       </EditModal>
     </SafeAreaView>
   );
@@ -331,9 +360,16 @@ const EditModal = ({ visible, title, children, onClose }) => (
   </Modal>
 );
 
-const PrimarySave = ({ onPress }) => (
-  <Pressable style={styles.primaryBtn} onPress={onPress}>
-    <Text style={styles.primaryBtnText}>บันทึก</Text>
+const PrimarySave = ({ onPress, loading }) => (
+  <Pressable style={[styles.primaryBtn, loading && { opacity: 0.7 }]} onPress={loading ? undefined : onPress}>
+    {loading ? (
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <ActivityIndicator size="small" />
+        <Text style={styles.primaryBtnText}>กำลังบันทึก...</Text>
+      </View>
+    ) : (
+      <Text style={styles.primaryBtnText}>บันทึก</Text>
+    )}
   </Pressable>
 );
 
@@ -346,7 +382,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
     paddingBottom: 20,
-    height : "100%",
+    height: "100%",
     flexGrow: 0,
   },
   input: {
