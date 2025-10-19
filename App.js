@@ -11,6 +11,8 @@ import AddTransactionScreen from "./src/screens/AddTransactionScreen";
 import EditTransactionScreen from "./src/screens/EditTransactionScreen";
 import SummaryScreen from "./src/screens/SummaryScreen";
 import SettingScreen from "./src/screens/SettingScreen";
+import SummaryDetailScreen from "./src/screens/SummaryDetailScreen";
+
 
 
 const Stack = createNativeStackNavigator();
@@ -35,6 +37,7 @@ export default function App() {
           <Stack.Screen name="EditTransaction" component={EditTransactionScreen} options={{ title: "แก้ไขรายการ" }} />
           <Stack.Screen name="Summary" component={SummaryScreen} options={{ title: "สรุปผลรายการ" }} />
           <Stack.Screen name="Setting" component={SettingScreen} options={{ headerShown: false }}  />
+          <Stack.Screen name="SummaryDetail" component={SummaryDetailScreen} options={{ headerShown: false }} />
 
 
         </Stack.Navigator>

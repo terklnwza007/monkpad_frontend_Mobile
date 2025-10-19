@@ -367,59 +367,59 @@ automaticallyAdjustContentInsets={false}
 
 
 
-        {/* ===== พาย: รายรับ (ตลอดเวลา) ===== */}
-        <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}>สัดส่วนรายรับ</Text>
-          </View>
-          {loadingPies ? (
-            <ActivityIndicator />
-          ) : (
-            <View style={{ alignItems: "center" }}>
-              <PieChart
-                data={toPieData(pieIncome, "ไม่มีข้อมูลรายรับ")}
-                width={chartWidth - 16}
+        {/* === สัดส่วนรายรับตามแท็ก (Pie) === */}
+{!loadingPies && (
+  <View style={styles.card}>
+    <View style={styles.cardHeaderRow}>
+      
+      <Text style={styles.cardTitle}>สัดส่วนรายรับ</Text>
+    </View>
+
+    <Pressable onPress={() => navigation.navigate("SummaryDetail", { mode: "income", title: "รายรับ" })}>
+      <PieChart
+        data={toPieData(pieIncome, "ไม่มีข้อมูล")}
+        accessor="population"
+        width={chartWidth - 16}
                 height={210}
-                accessor={"population"}
-                backgroundColor={"transparent"}
-                paddingLeft={"0"}
-                absolute={false}
-                hasLegend={true}
-                chartConfig={DEFAULT_CHART_CONFIG}
-              />
-              <Text style={styles.subNote}>
-                รวมทั้งหมด {baht(pieIncome.reduce((s, x) => s + (x?.amount || 0), 0))} บาท
-              </Text>
-            </View>
-          )}
-        </View>
+        backgroundColor="transparent"
+        paddingLeft="0"
+        hasLegend={true}
+        chartConfig={DEFAULT_CHART_CONFIG}
+      />
+    </Pressable>
+
+    <Text style={styles.subNote}>
+      รวมทั้งหมด {baht(pieIncome.reduce((s, x) => s + (x?.amount || 0), 0))} บาท
+    </Text>
+  </View>
+)}
 
         {/* ===== พาย: รายจ่าย (ตลอดเวลา) ===== */}
-        <View style={styles.card}>
-          <View style={styles.cardHeaderRow}>
-            <Text style={styles.cardTitle}>สัดส่วนรายจ่าย</Text>
-          </View>
-          {loadingPies ? (
-            <ActivityIndicator />
-          ) : (
-            <View style={{ alignItems: "center" }}>
-              <PieChart
-                data={toPieData(pieExpense, "ไม่มีข้อมูลรายจ่าย")}
-                width={chartWidth - 16}
+        {!loadingPies && (
+  <View style={styles.card}>
+    <View style={styles.cardHeaderRow}>
+      
+      <Text style={styles.cardTitle}>สัดส่วนรายจ่าย</Text>
+    </View>
+
+    <Pressable onPress={() => navigation.navigate("SummaryDetail", { mode: "expense", title: "รายจ่าย" })}>
+  <PieChart
+    data={toPieData(pieExpense, "ไม่มีข้อมูล")}
+    accessor="population"
+    width={chartWidth - 16}
                 height={210}
-                accessor={"population"}
-                backgroundColor={"transparent"}
-                paddingLeft={"0"}
-                absolute={false}
-                hasLegend={true}
-                chartConfig={DEFAULT_CHART_CONFIG}
-              />
-              <Text style={styles.subNote}>
-                รวมทั้งหมด {baht(pieExpense.reduce((s, x) => s + (x?.amount || 0), 0))} บาท
-              </Text>
-            </View>
-          )}
-        </View>
+    backgroundColor="transparent"
+    paddingLeft="0"
+    hasLegend={true}
+    chartConfig={DEFAULT_CHART_CONFIG}
+  />
+</Pressable>
+
+    <Text style={styles.subNote}>
+      รวมทั้งหมด {baht(pieExpense.reduce((s, x) => s + (x?.amount || 0), 0))} บาท
+    </Text>
+  </View>
+)}
       </ScrollView>
     </SafeAreaView>
   );

@@ -363,7 +363,7 @@ const EditModal = ({ visible, title, children, onClose }) => (
 const PrimarySave = ({ onPress, loading }) => (
   <Pressable style={[styles.primaryBtn, loading && { opacity: 0.7 }]} onPress={loading ? undefined : onPress}>
     {loading ? (
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ flexDirection: "row", alignItems: "center"}}>
         <ActivityIndicator size="small" />
         <Text style={styles.primaryBtnText}>กำลังบันทึก...</Text>
       </View>
@@ -445,25 +445,30 @@ const styles = StyleSheet.create({
   modalBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.35)",
-    padding: 16,
     justifyContent: "flex-end",
+    
   },
   modalCard: {
     backgroundColor: "#F7F7FA",
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
     padding: 16,
+    
   },
   primaryBtn: {
     height: 48,
+    width : "120%",
     backgroundColor: "#0B84FF",
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf : "center",
     marginTop: 6,
+    
   },
   primaryBtnText: {
     color: "#fff",
     fontWeight: "700",
+    
   },
 });
